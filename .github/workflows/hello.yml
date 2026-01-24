@@ -10,6 +10,6 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Hello World Step
-        shell: powershell
+        shell: pwsh
         run: |
-          Write-Output "Hello World from Windows Self-Hosted Runner"
+          Write-Host "Hello World from Windows Self-Hosted Runner"
