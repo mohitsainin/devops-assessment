@@ -1,77 +1,29 @@
-name: CI-CD Pipeline (Windows 11 Self-Hosted)
+name: CI-CD Pipeline
 
 on:
   push:
     branches:
       - main
-  
-jobs: 
-  build-and-push: 
-    runs-on: [self-hosted, windows]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
 
     steps:
-      # ---------------------------
-      # Checkout
-      # ---------------------------
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ---------------------------
-      # Runner context verification
-      # ---------------------------
-      - name: Verify runner user
-        shell: cmd
+      - name: Login to Docker Hub
         run: |
-          echo RUNNING AS:
-          whoami
-          echo USER PROFILE:
-          echo %USERPROFILE%
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login \
+          -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # ---------------------------
-      # Debug secrets presence (SAFE)
-      # ---------------------------
-      - name: Debug secrets presence
-        shell: cmd
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build & Push Backend Image
         run: |
-          if "%DOCKER_USERNAME%"=="" echo DOCKER_USERNAME NOT SET
-          if "%DOCKER_PASSWORD%"=="" echo DOCKER_PASSWORD NOT SET
-          if NOT "%DOCKER_USERNAME%"=="" echo DOCKER_USERNAME SET
-          if NOT "%DOCKER_PASSWORD%"=="" echo DOCKER_PASSWORD SET
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/devops-backend ./backend
+          docker push ${{ secrets.DOCKER_USERNAME }}/devops-backend
 
-      # ---------------------------
-      # Docker login (ROBUST – Windows)
-      # ---------------------------
-      - name: Docker Login
-        shell: cmd
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build & Push Frontend Image
         run: |
-          echo Logging into Docker Hub...
-          echo %DOCKER_PASSWORD%>docker_pass.txt
-          docker login -u %DOCKER_USERNAME% --password-stdin < docker_pass.txt
-
-      # ---------------------------
-      # Build & Push Backend
-      # ---------------------------
-      - name: Build & Push Backend
-        shell: cmd
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        run: |
-          docker build -t %DOCKER_USERNAME%/devops-backend:latest backend
-          docker push %DOCKER_USERNAME%/devops-backend:latest
-
-      # ---------------------------
-      # Build & Push Frontend
-      # ---------------------------
-      - name: Build & Push Frontend
-        shell: cmd
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        run: |
-          docker build -t %DOCKER_USERNAME%/devops-frontend:latest frontend
-          docker push %DOCKER_USERNAME%/devops-frontend:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/devops-frontend ./frontend
+          docker push ${{ secrets.DOCKER_USERNAME }}/devops-frontend
