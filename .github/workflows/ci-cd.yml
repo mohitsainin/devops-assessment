@@ -1,32 +1,42 @@
-name: CI-CD Pipeline
+name: CI-CD Pipeline (Windows 11)
 
 on:
   push:
     branches:
-      - main 
- 
+      - main
+
 jobs:
   build-and-push:
-    runs-on: self-hosted
+    runs-on: [self-hosted, windows]
 
     steps:
-      - name: Checkout code
+      - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Docker Login
+      # ---- Docker sanity check ----
+      - name: Verify Docker
         shell: powershell
         run: |
-          "${{ secrets.DOCKER_PASSWORD }}" | docker login `
+          docker version
+          docker info
+
+      # ---- Docker Login (SAFE & RELIABLE) ----
+      - name: Docker Login
+        shell: bash
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login \
             -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+      # ---- Build & Push Backend Image ----
       - name: Build & Push Backend Image
-        shell: powershell
+        shell: bash
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/devops-backend ./backend
-          docker push ${{ secrets.DOCKER_USERNAME }}/devops-backend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/devops-backend:latest ./backend
+          docker push ${{ secrets.DOCKER_USERNAME }}/devops-backend:latest
 
+      # ---- Build & Push Frontend Image ----
       - name: Build & Push Frontend Image
-        shell: powershell
+        shell: bash
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/devops-frontend ./frontend
-          docker push ${{ secrets.DOCKER_USERNAME }}/devops-frontend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/devops-frontend:latest ./frontend
+          docker push ${{ secrets.DOCKER_USERNAME }}/devops-frontend:latest
