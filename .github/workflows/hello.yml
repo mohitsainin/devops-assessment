@@ -1,0 +1,12 @@
+name: Hello World CI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  hello:
+    runs-on: self-hosted
+    steps:
+      - name: Print Hello World
+        run: echo "Hello World from Self-Hosted Runner"
