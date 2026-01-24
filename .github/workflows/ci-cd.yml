@@ -10,20 +10,24 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - uses: actions/checkout@v4
+      # Checkout source code
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Build & Push Backend
+      # Build & push backend image
+      - name: Build and Push Backend Image
         run: |
-          docker build -t rishisingh/devops-backend ./backend
-          docker push rishisingh/devops-backend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/devops-backend:latest ./backend
+          docker push ${{ secrets.DOCKER_USERNAME }}/devops-backend:latest
 
-      - name: Build & Push Frontend
+      # Build & push frontend image
+      - name: Build and Push Frontend Image
         run: |
-          docker build -t rishisingh/devops-frontend ./frontend
-          docker push rishisingh/devops-frontend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/devops-frontend:latest ./frontend
+          docker push ${{ secrets.DOCKER_USERNAME }}/devops-frontend:latest
 
-      # ✅ SUCCESS EMAIL
-      - name: Email on Success
+      # Email notification on success
+      - name: Send Email on Success
         if: success()
         uses: dawidd6/action-send-mail@v3
         with:
@@ -31,25 +35,27 @@ jobs:
           server_port: 587
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "✅ CI/CD Pipeline SUCCESS"
-          to: it.mohitsaini@gmail.com
-          from: GitHub Actions <it.mohitsaini@gmail.com>
+          subject: "CI/CD Pipeline Success"
+          to: ${{ secrets.NOTIFY_EMAIL }}
+          from: GitHub Actions <${{ secrets.SMTP_USERNAME }}>
           body: |
-            Hello Mohit,
+            Hello,
 
-            Your CI/CD pipeline has completed SUCCESSFULLY ✅
+            The CI/CD pipeline completed successfully.
 
-            Repository: ${{ github.repository }}
-            Branch: ${{ github.ref_name }}
-            Commit: ${{ github.sha }}
+            Repository : ${{ github.repository }}
+            Branch     : ${{ github.ref_name }}
+            Commit SHA : ${{ github.sha }}
+            Workflow   : ${{ github.workflow }}
+            Run ID     : ${{ github.run_id }}
 
-            Docker Images pushed successfully.
+            Docker images were built and pushed successfully.
 
             Regards,
-            GitHub Actions 🚀
+            GitHub Actions
 
-      # ❌ FAILURE EMAIL
-      - name: Email on Failure
+      # Email notification on failure
+      - name: Send Email on Failure
         if: failure()
         uses: dawidd6/action-send-mail@v3
         with:
@@ -57,19 +63,21 @@ jobs:
           server_port: 587
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "❌ CI/CD Pipeline FAILED"
-          to: it.mohitsaini@gmail.com
-          from: GitHub Actions <it.mohitsaini@gmail.com>
+          subject: "CI/CD Pipeline Failed"
+          to: ${{ secrets.NOTIFY_EMAIL }}
+          from: GitHub Actions <${{ secrets.SMTP_USERNAME }}>
           body: |
-            Hello Mohit,
+            Hello,
 
-            ❌ Your CI/CD pipeline has FAILED.
+            The CI/CD pipeline has failed.
 
-            Repository: ${{ github.repository }}
-            Branch: ${{ github.ref_name }}
-            Commit: ${{ github.sha }}
+            Repository : ${{ github.repository }}
+            Branch     : ${{ github.ref_name }}
+            Commit SHA : ${{ github.sha }}
+            Workflow   : ${{ github.workflow }}
+            Run ID     : ${{ github.run_id }}
 
-            Please check GitHub Actions logs.
+            Please review the GitHub Actions logs for details.
 
             Regards,
-            GitHub Actions 🚨
+            GitHub Actions
