@@ -1,6 +1,6 @@
 name: CI-CD Pipeline (Windows Only)
 
-on:
+on: 
   push:
     branches:
       - main
