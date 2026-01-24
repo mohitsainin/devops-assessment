@@ -17,18 +17,18 @@ jobs:
       - name: Docker Login (DEBUG)
         shell: cmd
         run: |
-          echo DEBUG_TOKEN_HERE | docker login -u DEBUG_USERNAME_HERE --password-stdin
+          echo dckr_pat_RxYJQSJhEN0dt1-cULf49KbTFrc | docker login -u mohitsaini --password-stdin
 
       # ---- Build & Push Backend ----
       - name: Build & Push Backend
         shell: cmd
         run: |
-          docker build -t DEBUG_USERNAME_HERE/devops-backend:latest backend
-          docker push DEBUG_USERNAME_HERE/devops-backend:latest
+          docker build -t mohitsaini/devops-backend:latest backend
+          docker push mohitsaini/devops-backend:latest
 
       # ---- Build & Push Frontend ----
       - name: Build & Push Frontend
         shell: cmd
         run: |
-          docker build -t DEBUG_USERNAME_HERE/devops-frontend:latest frontend
-          docker push DEBUG_USERNAME_HERE/devops-frontend:latest
+          docker build -t mohitsaini/devops-frontend:latest frontend
+          docker push mohitsaini/devops-frontend:latest
