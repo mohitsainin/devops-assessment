@@ -7,23 +7,26 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Login to Docker Hub
+        shell: powershell
         run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login \
-          -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          echo "${{ secrets.DOCKER_PASSWORD }}" |
+          docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build & Push Backend Image
+        shell: powershell
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/devops-backend ./backend
           docker push ${{ secrets.DOCKER_USERNAME }}/devops-backend
 
       - name: Build & Push Frontend Image
+        shell: powershell
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/devops-frontend ./frontend
           docker push ${{ secrets.DOCKER_USERNAME }}/devops-frontend
