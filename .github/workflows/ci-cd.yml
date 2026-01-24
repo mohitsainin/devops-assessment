@@ -10,32 +10,35 @@ jobs:
     runs-on: self-hosted
 
     env:
-      # Docker username (lowercase will be enforced at runtime)
-      DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
-
-      # Email fallback: secret ho to use karo, warna default
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL || 'it.mohitsaini@gmail.com' }}
 
     steps:
-      # Checkout source code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Convert Docker username to lowercase (Windows-safe)
+      - name: Prepare Docker username
+        shell: powershell
+        run: |
+          $lower = "${{ env.DOCKER_USERNAME }}".ToLower()
+          echo "DOCKER_USER_LOWER=$lower" >> $env:GITHUB_ENV
+
       # Build & Push Backend Image
       - name: Build and Push Backend Image
-        shell: bash
+        shell: powershell
         run: |
-          docker build -t ${DOCKER_USER,,}/devops-backend:latest ./backend
-          docker push ${DOCKER_USER,,}/devops-backend:latest
+          docker build -t $env:DOCKER_USER_LOWER/devops-backend:latest ./backend
+          docker push $env:DOCKER_USER_LOWER/devops-backend:latest
 
       # Build & Push Frontend Image
       - name: Build and Push Frontend Image
-        shell: bash
+        shell: powershell
         run: |
-          docker build -t ${DOCKER_USER,,}/devops-frontend:latest ./frontend
-          docker push ${DOCKER_USER,,}/devops-frontend:latest
+          docker build -t $env:DOCKER_USER_LOWER/devops-frontend:latest ./frontend
+          docker push $env:DOCKER_USER_LOWER/devops-frontend:latest
 
-      # Email notification on SUCCESS
+      # Email on SUCCESS
       - name: Send Email on Success
         if: success()
         uses: dawidd6/action-send-mail@v3
@@ -63,7 +66,7 @@ jobs:
             Regards,
             GitHub Actions
 
-      # Email notification on FAILURE (GUARANTEED)
+      # Email on FAILURE (GUARANTEED)
       - name: Send Email on Failure
         if: failure()
         uses: dawidd6/action-send-mail@v3
