@@ -2,12 +2,14 @@ name: Hello World CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   hello:
     runs-on: self-hosted
     steps:
-      - name: Print Hello World
+      - name: Hello World Step
         shell: powershell
-        run: Write-Output "Hello World from Self-Hosted Runner"
+        run: |
+          Write-Output "Hello World from Windows Self-Hosted Runner"
