@@ -21,3 +21,55 @@ jobs:
         run: |
           docker build -t rishisingh/devops-frontend ./frontend
           docker push rishisingh/devops-frontend
+
+      # ✅ SUCCESS EMAIL
+      - name: Email on Success
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "✅ CI/CD Pipeline SUCCESS"
+          to: it.mohitsaini@gmail.com
+          from: GitHub Actions <it.mohitsaini@gmail.com>
+          body: |
+            Hello Mohit,
+
+            Your CI/CD pipeline has completed SUCCESSFULLY ✅
+
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+
+            Docker Images pushed successfully.
+
+            Regards,
+            GitHub Actions 🚀
+
+      # ❌ FAILURE EMAIL
+      - name: Email on Failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "❌ CI/CD Pipeline FAILED"
+          to: it.mohitsaini@gmail.com
+          from: GitHub Actions <it.mohitsaini@gmail.com>
+          body: |
+            Hello Mohit,
+
+            ❌ Your CI/CD pipeline has FAILED.
+
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+
+            Please check GitHub Actions logs.
+
+            Regards,
+            GitHub Actions 🚨
